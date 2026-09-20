@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeTutor · 程序员的 AI 错题搭子</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel2: #1c2330; --border: #2d3748;
+    --text: #e6edf3; --muted: #8b949e; --accent: #4f8ef7; --accent2: #7c5cff;
+    --green: #2ea043; --green-bg: #12261e; --red: #f85149; --amber: #d29922;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: "Microsoft YaHei", "PingFang SC", sans-serif; min-height: 100vh; }
+  .header { padding: 20px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, #0d1117, #131a2a); }
+  .logo { font-size: 22px; font-weight: 700; background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .logo small { display: block; font-size: 12px; color: var(--muted); -webkit-text-fill-color: var(--muted); font-weight: 400; margin-top: 2px; }
+  .tabs { display: flex; gap: 8px; }
+  .tab { padding: 8px 18px; border-radius: 20px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); cursor: pointer; font-size: 14px; }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .badge-mock { background: var(--amber); color: #1a1a1a; font-size: 12px; padding: 3px 10px; border-radius: 10px; margin-left: 12px; font-weight: 600; }
+  .container { display: flex; gap: 20px; padding: 24px 32px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
+  .left { width: 42%; position: sticky; top: 20px; }
+  .right { flex: 1; min-height: 400px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 16px; }
+  .panel h3 { font-size: 15px; margin-bottom: 12px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  textarea { width: 100%; background: #0a0e14; color: #a5d6ff; border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: Consolas, "Courier New", monospace; font-size: 13px; line-height: 1.5; resize: vertical; }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  .code-input { min-height: 200px; }
+  .error-input { min-height: 70px; margin-top: 10px; color: #ffa198; }
+  .btn { width: 100%; margin-top: 14px; padding: 13px; border: none; border-radius: 10px; background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+  .btn:hover { opacity: .9; }
+  .btn:disabled { opacity: .5; cursor: wait; }
+  .examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .example-chip { font-size: 12px; padding: 5px 12px; border-radius: 14px; border: 1px solid var(--border); background: var(--panel2); color: var(--muted); cursor: pointer; }
+  .example-chip:hover { color: var(--accent); border-color: var(--accent); }
+  /* 流水线步骤 */
+  .steps { display: flex; gap: 6px; margin-bottom: 16px; }
+  .step { flex: 1; text-align: center; padding: 10px 4px; border-radius: 8px; background: var(--panel); border: 1px solid var(--border); font-size: 12px; color: var(--muted); transition: all .3s; }
+  .step.running { border-color: var(--accent); color: var(--accent); animation: pulse 1s infinite; }
+  .step.done { border-color: var(--green); color: var(--green); }
+  .step.error { border-color: var(--red); color: var(--red); }
+  .step .t { font-weight: 600; font-size: 13px; }
+  @keyframes pulse { 50% { opacity: .6; } }
+  /* 结果卡片 */
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+  .card-title { font-size: 15px; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 12px; background: var(--panel2); border: 1px solid var(--border); color: var(--muted); margin: 2px 4px 2px 0; }
+  .tag.type { background: rgba(248,81,73,.15); color: var(--red); border-color: var(--red); }
+  .tag.kb { background: rgba(79,142,247,.12); color: var(--accent); border-color: var(--accent); }
+  .verify-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 14px; font-size: 13px; font-weight: 600; background: var(--green-bg); color: var(--green); border: 1px solid var(--green); }
+  .verify-badge.fail { background: rgba(248,81,73,.12); color: var(--red); border-color: var(--red); }
+  .code-block { background: #0a0e14; border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-family: Consolas, monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; color: #a5d6ff; margin-top: 10px; overflow-x: auto; }
+  .explain-item { margin: 10px 0; padding-left: 12px; border-left: 3px solid var(--accent2); }
+  .explain-item b { color: var(--accent2); font-size: 13px; }
+  .quiz-item { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 10px; background: var(--panel2); }
+  .quiz-q { font-size: 14px; margin: 6px 0; white-space: pre-wrap; }
+  .quiz-answer { display: none; margin-top: 8px; padding: 10px; background: #0a0e14; border-radius: 8px; font-size: 13px; color: var(--muted); white-space: pre-wrap; }
+  .quiz-toggle { font-size: 12px; color: var(--accent); cursor: pointer; user-select: none; }
+  .archive-tip { background: linear-gradient(90deg, rgba(79,142,247,.12), rgba(124,92,255,.12)); border: 1px solid var(--accent); border-radius: 12px; padding: 14px 18px; font-size: 14px; }
+  .placeholder { text-align: center; color: var(--muted); padding: 80px 20px; font-size: 14px; line-height: 2; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+  .stat-box { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .history-row { display: flex; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .history-row:hover { background: var(--panel2); }
+  .muted { color: var(--muted); font-size: 12px; }
+  .step-detail { font-size: 11px; color: var(--muted); margin-top: 4px; max-height: 0; overflow: hidden; transition: max-height .3s; }
+  .step.done .step-detail, .step.error .step-detail { max-height: 60px; }
+  /* 档案详情模态框 */
+  .modal-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.65); z-index: 100; justify-content: center; align-items: center; }
+  .modal-mask.show { display: flex; }
+  .modal { width: 720px; max-width: 92vw; max-height: 86vh; overflow-y: auto; background: var(--panel); border: 1px solid var(--accent); border-radius: 14px; padding: 22px 26px; }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .modal-head b { font-size: 16px; }
+  .modal-close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; }
+  .modal-close:hover { color: var(--text); }
+  .detail-label { font-size: 12px; color: var(--muted); margin: 14px 0 6px; }
+  .review-btn { font-size: 12px; padding: 4px 12px; border-radius: 12px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; margin-right: 6px; }
+  .review-btn:hover { background: var(--accent); color: #fff; }
+  /* 薄弱点三卡片(默认收起,点击展开) */
+  .weak-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .weak-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all .2s; user-select: none; }
+  .weak-card:hover { border-color: var(--accent); }
+  .weak-title { font-size: 14px; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+  .weak-arrow { font-size: 12px; color: var(--muted); transition: transform .2s; }
+  .weak-card.open .weak-arrow { transform: rotate(90deg); }
+  .weak-sub { font-size: 11px; color: var(--muted); margin: 2px 0 6px; }
+  .weak-summary { color: var(--accent); font-size: 22px; font-weight: 700; margin: 6px 0; }
+  .weak-body { display: none; margin-top: 8px; }
+  .weak-card.open .weak-body { display: block; }
+  .weak-body .wrow { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+  .weak-body .wrow:last-child { border-bottom: none; }
+  .weak-count { background: rgba(79,142,247,.15); color: var(--accent); border-radius: 10px; padding: 1px 9px; font-size: 12px; font-weight: 600; }
+  .weak-empty { color: var(--muted); font-size: 12px; padding: 12px 0; text-align: center; }
+  /* 错题档案折叠卡片 */
+  .fold-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+  .fold-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 18px; cursor: pointer; user-select: none; }
+  .fold-head:hover { background: var(--panel2); }
+  .fold-head .arrow { color: var(--muted); font-size: 12px; transition: transform .2s; }
+  .fold-card.open .fold-head .arrow { transform: rotate(90deg); }
+  .fold-title { font-size: 15px; font-weight: 600; }
+  .fold-badge { background: rgba(79,142,247,.15); color: var(--accent); border-radius: 12px; padding: 2px 12px; font-size: 12px; font-weight: 600; margin-left: 8px; }
+  .fold-body { display: none; padding: 4px 18px 18px; }
+  .fold-card.open .fold-body { display: block; }
+  /* 错题档案卡片 */
+  .arc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .arc-card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all .2s; }
+  .arc-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .arc-card .t { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .arc-card .cause { font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 8px; }
+  .arc-card .code-preview { background: #0a0e14; border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: Consolas, monospace; font-size: 11px; line-height: 1.5; color: #a5d6ff; white-space: pre-wrap; overflow: hidden; max-height: 108px; position: relative; margin-top: 6px; }
+  .arc-card .code-preview::after { content: ""; position: absolute; bottom: 0; left: 0; right: 0; height: 26px; background: linear-gradient(transparent, #0a0e14); }
+  .arc-card .foot { display: flex; justify-content: space-between; margin-top: 10px; font-size: 11px; color: var(--muted); }
+  .arc-card .tags { margin-top: 8px; }
+  .arc-card .tags .tag { font-size: 11px; padding: 2px 8px; }
+  /* 顶部用户区 */
+  .user-chip { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-right: 14px; }
+  .logout-btn { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 12px; padding: 4px 12px; font-size: 12px; cursor: pointer; }
+  .logout-btn:hover { color: var(--red); border-color: var(--red); }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">CodeTutor
+    <small>程序员的 AI 错题搭子 · 多智能体 · 沙箱验证 · 错题闭环</small>
+  </div>
+  <div style="display:flex;align-items:center;">
+    {% if mock_mode %}<span class="badge-mock">演示模式(未配置 API Key)</span>{% endif %}
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('work', this)">工作台</div>
+      <div class="tab" onclick="switchTab('archive', this)">我的档案</div>
+    </div>
+    <div class="user-chip">👤 {{ username }}<button class="logout-btn" onclick="logout()">退出</button></div>
+  </div>
+</div>
+
+<div class="container" id="page-work">
+  <div class="left">
+    <div class="panel">
+      <h3>🐞 粘贴你的问题代码</h3>
+      <textarea class="code-input" id="code" placeholder="粘贴报错的 Python 代码..."></textarea>
+      <textarea class="error-input" id="error" placeholder="粘贴报错信息,或描述你的问题(如:第二次调用结果不对...)"></textarea>
+      <button class="btn" id="submitBtn" onclick="analyze()">🔍 开始诊断</button>
+      <div class="examples" id="examples"></div>
+    </div>
+  </div>
+  <div class="right" id="resultArea">
+    <div class="placeholder">
+      👋 你好,我是你的 AI 错题搭子<br>
+      粘贴一段有问题的代码,我会为你完成:<br>
+      <b>诊断根因 → 沙箱验证修复 → 讲透错因 → 生成变式练习 → 记入错题档案</b>
+    </div>
+  </div>
+</div>
+
+<div class="container" id="page-archive" style="display:none;">
+  <div style="width:100%">
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="weak-grid">
+      <div class="weak-card" id="wcard24h" onclick="toggleWeak('wcard24h')">
+        <div class="weak-title">⚡ 近 24 小时薄弱点 <span class="weak-arrow">▶</span></div>
+        <div class="weak-sub">最新的问题 · 点击查看明细</div>
+        <div class="weak-summary" id="wsum24h">-</div>
+        <div id="weak24h" class="weak-body"></div>
+      </div>
+      <div class="weak-card" id="wcard7d" onclick="toggleWeak('wcard7d')">
+        <div class="weak-title">📈 近 7 天薄弱点 <span class="weak-arrow">▶</span></div>
+        <div class="weak-sub">近期趋势 · 点击查看明细</div>
+        <div class="weak-summary" id="wsum7d">-</div>
+        <div id="weak7d" class="weak-body"></div>
+      </div>
+      <div class="weak-card" id="wcardAll" onclick="toggleWeak('wcardAll')">
+        <div class="weak-title">🧱 历史累计薄弱点 <span class="weak-arrow">▶</span></div>
+        <div class="weak-sub">长期顽疾 · 点击查看明细</div>
+        <div class="weak-summary" id="wsumAll">-</div>
+        <div id="weakAll" class="weak-body"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>📅 今日到期复习</h3>
+      <div id="reviewList" class="muted">加载中...</div>
+    </div>
+    <h3 style="margin: 18px 0 12px;">📚 错题档案</h3>
+    <div class="fold-card" id="fold24h">
+      <div class="fold-head" onclick="toggleFold('fold24h', 24)">
+        <span class="fold-title">⚡ 近 24 小时错题<span class="fold-badge" id="fb24h">-</span></span>
+        <span class="arrow">▶ 点击查看</span>
+      </div>
+      <div class="fold-body"><div class="arc-grid" id="grid24h"></div></div>
+    </div>
+    <div class="fold-card" id="foldAll">
+      <div class="fold-head" onclick="toggleFold('foldAll', null)">
+        <span class="fold-title">🧱 历史累计错题<span class="fold-badge" id="fbAll">-</span></span>
+        <span class="arrow">▶ 点击查看</span>
+      </div>
+      <div class="fold-body"><div class="arc-grid" id="gridAll"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 档案详情模态框 -->
+<div class="modal-mask" id="modalMask" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head"><b id="modalTitle">错题档案</b>
+      <button class="modal-close" onclick="closeModal()">×</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const EXAMPLES = [
+  {name: "可变默认参数", code: "def add_item(item, box=[]):\n    box.append(item)\n    return box\n\nprint(add_item(1))\nprint(add_item(2))\n", error: "第二次调用期望返回 [2],实际返回 [1, 2],数据串了"},
+  {name: "索引越界", code: "scores = [85, 92, 78]\ntotal = 0\nfor i in range(len(scores) + 1):\n    total += scores[i]\nprint(total)\n", error: "IndexError: list index out of range"},
+  {name: "递归缺基例", code: "def factorial(n):\n    return n * factorial(n - 1)\n\nprint(factorial(5))\n", error: "RecursionError: maximum recursion depth exceeded"},
+  {name: "sort返回值误用", code: "nums = [3, 1, 2]\nsorted_nums = nums.sort()\nprint('最小值:', sorted_nums[0])\n", error: "TypeError: 'NoneType' object is not subscriptable"},
+  {name: "遍历删元素", code: "nums = [1, 2, 3, 4, 5, 6]\nfor n in nums:\n    if n % 2 == 0:\n        nums.remove(n)\nprint(nums)\n", error: "想删掉所有偶数,结果输出 [1, 3, 4, 5],4 没删掉"}
+];
+const AGENTS = ["诊断 Agent", "修复 Agent", "讲解 Agent", "档案 Agent"];
+
+window.onload = function() {
+  const box = document.getElementById("examples");
+  EXAMPLES.forEach(function(ex, i) {
+    const chip = document.createElement("span");
+    chip.className = "example-chip";
+    chip.textContent = ex.name;
+    chip.onclick = function() {
+      document.getElementById("code").value = ex.code;
+      document.getElementById("error").value = ex.error;
+    };
+    box.appendChild(chip);
+  });
+  // ?demo=N 自动填充第 N 个示例并运行(用于演示录制与截图)
+  const m = location.search.match(/demo=(\d+)/);
+  if (m) {
+    const ex = EXAMPLES[Math.min(parseInt(m[1]), EXAMPLES.length - 1)];
+    document.getElementById("code").value = ex.code;
+    document.getElementById("error").value = ex.error;
+    analyze();
+  }
+  // ?page=archive 直接打开档案页(截图用)
+  if (/page=archive/.test(location.search)) {
+    switchTab('archive', document.querySelectorAll('.tab')[1]);
+  }
+};
+
+function switchTab(name, el) {
+  document.querySelectorAll(".tab").forEach(function(t){ t.classList.remove("active"); });
+  el.classList.add("active");
+  document.getElementById("page-work").style.display = name === "work" ? "flex" : "none";
+  document.getElementById("page-archive").style.display = name === "archive" ? "flex" : "none";
+  if (name === "archive") loadArchive();
+}
+
+function esc(s) {
+  return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+async function analyze() {
+  const code = document.getElementById("code").value.trim();
+  const error = document.getElementById("error").value.trim();
+  if (!code) { alert("请先粘贴问题代码"); return; }
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true; btn.textContent = "智能体协作中...";
+  renderRunning();
+  try {
+    const resp = await fetch("/api/analyze", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({code: code, error: error})
+    });
+    const data = await resp.json();
+    renderResult(data);
+  } catch (e) {
+    document.getElementById("resultArea").innerHTML =
+      '<div class="card"><div class="card-title">❌ 请求失败</div><div class="muted">' + esc(e.message) + "</div></div>";
+  }
+  btn.disabled = false; btn.textContent = "🔍 开始诊断";
+}
+
+function renderRunning() {
+  let html = '<div class="steps">';
+  AGENTS.forEach(function(a, i) {
+    html += '<div class="step' + (i === 0 ? " running" : "") + '" id="step-' + i + '"><div class="t">' + a + '</div></div>';
+  });
+  html += "</div>" + '<div class="placeholder">🤖 多智能体流水线运行中,请稍候...</div>';
+  document.getElementById("resultArea").innerHTML = html;
+  let cur = 0;
+  window._timer = setInterval(function() {
+    if (cur < AGENTS.length - 1) {
+      document.getElementById("step-" + cur).className = "step done";
+      cur++;
+      document.getElementById("step-" + cur).className = "step running";
+    }
+  }, 1800);
+}
+
+function renderResult(r) {
+  clearInterval(window._timer);
+  let html = '<div class="steps">';
+  (r.steps || []).forEach(function(s) {
+    const cls = s.status === "done" ? "done" : "error";
+    html += '<div class="step ' + cls + '"><div class="t">' + esc(s.title) + '</div>' +
+            '<div class="step-detail">' + esc(s.detail) + " · " + s.elapsed + "s</div></div>";
+  });
+  html += "</div>";
+
+  // 诊断
+  const d = r.diagnosis || {};
+  html += '<div class="card"><div class="card-title">🎯 诊断报告' +
+          '<span class="tag type">' + esc(d.error_type) + '</span>' +
+          '<span class="tag">第 ' + esc(d.error_line) + ' 行</span></div>' +
+          '<p style="font-size:14px;line-height:1.8;">' + esc(d.root_cause) + "</p>" +
+          '<div style="margin-top:8px;">' + (d.knowledge_tags || []).map(function(t){
+            return '<span class="tag kb">📖 ' + esc(t) + "</span>"; }).join("") + "</div>";
+  if (r.knowledge_refs && r.knowledge_refs.length) {
+    html += '<div class="muted" style="margin-top:8px;">RAG 引用知识库:' +
+            r.knowledge_refs.map(function(k){ return esc(k.id + " " + k.title); }).join("、") + "</div>";
+  }
+  html += "</div>";
+
+  // 修复
+  const f = r.fix || {};
+  html += '<div class="card"><div class="card-title">🔧 修复方案</div>' +
+          '<div class="muted">' + esc(f.change_summary) + "</div>" +
+          '<div class="code-block">' + esc(f.fixed_code) + "</div>";
+  if (f.sandbox_stdout) {
+    html += '<div class="muted" style="margin-top:6px;">运行结果:</div><div class="code-block">' + esc(f.sandbox_stdout) + "</div>";
+  }
+  html += "</div>";
+
+  // 讲解
+  const e = r.explanation || {};
+  html += '<div class="card"><div class="card-title">💡 三段式讲解</div>' +
+          '<div class="explain-item"><b>考点定位</b><br>' + esc(e.concept) + "</div>" +
+          '<div class="explain-item"><b>错因分析</b><br>' + esc(e.why_common) + "</div>" +
+          '<div class="explain-item"><b>原理解读</b><br>' + esc(e.principle) + "</div></div>";
+
+  // 举一反三(按需生成,点击后才调用出题 Agent)
+  html += '<div class="card" id="quizCard"><div class="card-title">📝 举一反三练习</div>' +
+          '<div class="muted" style="margin-bottom:10px;">基于本次错因生成 3 道递进练习' +
+          '(巩固/迁移/挑战),按需生成,约 10 秒。</div>' +
+          '<button class="btn" style="width:auto;padding:9px 22px;font-size:14px;" ' +
+          'onclick="genQuiz(' + r.archive_id + ', this)">✨ 生成举一反三练习</button>' +
+          '<div id="quizBody"></div></div>';
+
+  // 归档
+  html += '<div class="archive-tip">🗂 本次 debug 已归档为 <b>#' + esc(r.archive_id) +
+          "</b>,系统已按艾宾浩斯遗忘曲线为你安排复习(1/2/4/7/15 天)," +
+          '可在「我的档案」中查看学情与今日复习。</div>';
+
+  document.getElementById("resultArea").innerHTML = html;
+}
+
+function toggleAnswer(el) {
+  const ans = el.nextElementSibling;
+  const show = ans.style.display === "block";
+  ans.style.display = show ? "none" : "block";
+  el.textContent = show ? "▶ 查看答案" : "▼ 收起答案";
+}
+
+async function genQuiz(archiveId, btn) {
+  btn.disabled = true;
+  btn.textContent = "🤖 出题 Agent 工作中...";
+  try {
+    const resp = await fetch("/api/quiz", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({archive_id: archiveId})
+    });
+    const r = await resp.json();
+    let html = "";
+    (r.questions || []).forEach(function(q) {
+      html += '<div class="quiz-item"><b>[' + esc(q.type) + "] " + esc(q.title) + "</b>" +
+              '<div class="quiz-q">' + esc(q.question) + "</div>" +
+              '<span class="quiz-toggle" onclick="toggleAnswer(this)">▶ 查看答案</span>' +
+              '<div class="quiz-answer">' + esc(q.answer) + "</div></div>";
+    });
+    if (!html) html = '<div class="muted">出题失败:' + esc(r.error || "未知错误") + "</div>";
+    document.getElementById("quizBody").innerHTML = html;
+    btn.style.display = "none";
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = "✨ 重试生成练习";
+  }
+}
+
+let STATS_CACHE = null;
+let foldLoaded = {fold24h: false, foldAll: false};
+
+async function loadArchive() {
+  const stats = await (await fetch("/api/stats")).json();
+  const review = await (await fetch("/api/review")).json();
+  STATS_CACHE = stats;
+
+  document.getElementById("statGrid").innerHTML =
+    box(stats.total, "错题总数") + box(stats.total_24h || 0, "今日新增") +
+    box(stats.due_today, "今日待复习") + box(Object.keys(stats.by_error_type || {}).length, "覆盖错误类型");
+  function box(n, l) { return '<div class="stat-box"><div class="stat-num">' + n + '</div><div class="stat-label">' + l + "</div></div>"; }
+
+  // 薄弱点卡片:默认只显示数量概要,明细点击后展开
+  fillWeakSummary("wsum24h", stats.weak_24h);
+  fillWeakSummary("wsum7d", stats.weak_7d);
+  fillWeakSummary("wsumAll", stats.weak_all);
+  renderWeak("weak24h", stats.weak_24h);
+  renderWeak("weak7d", stats.weak_7d);
+  renderWeak("weakAll", stats.weak_all);
+
+  // 错题档案折叠卡片:徽标显示条数,内容点击后加载
+  document.getElementById("fb24h").textContent = (stats.total_24h || 0) + " 条";
+  document.getElementById("fbAll").textContent = stats.total + " 条";
+
+  document.getElementById("reviewList").innerHTML = review.length
+    ? review.map(function(it) {
+        return '<div class="history-row"><span>#' + it.id + " [" + esc(it.error_type) + "] " +
+               esc((it.root_cause || "").slice(0, 40)) + '...</span>' +
+               '<span><button class="review-btn" onclick="showMistake(' + it.id + ')">查看错题</button>' +
+               '<button class="example-chip" onclick="reviewDone(' + it.id + ',1)">已掌握</button> ' +
+               '<button class="example-chip" onclick="reviewDone(' + it.id + ',0)">还不熟</button></span></div>';
+      }).join("")
+    : '<div class="muted">🎉 今天没有到期的复习任务</div>';
+}
+
+function fillWeakSummary(id, list) {
+  const n = (list || []).length;
+  document.getElementById(id).textContent = n > 0 ? n + " 个" : "无";
+}
+
+function renderWeak(id, list) {
+  const el = document.getElementById(id);
+  if (!list || !list.length) { el.innerHTML = '<div class="weak-empty">暂无数据</div>'; return; }
+  el.innerHTML = list.map(function(w) {
+    return '<div class="wrow"><span>' + esc(w.tag) + '</span><span class="weak-count">× ' + w.count + "</span></div>";
+  }).join("");
+}
+
+function toggleWeak(cardId) {
+  document.getElementById(cardId).classList.toggle("open");
+}
+
+async function toggleFold(foldId, hours) {
+  const card = document.getElementById(foldId);
+  card.classList.toggle("open");
+  if (card.classList.contains("open") && !foldLoaded[foldId]) {
+    const grid = foldId === "fold24h" ? "grid24h" : "gridAll";
+    document.getElementById(grid).innerHTML = '<div class="muted">加载中...</div>';
+    const url = hours ? "/api/history?hours=" + hours : "/api/history";
+    const hist = await (await fetch(url)).json();
+    document.getElementById(grid).innerHTML = renderArcCards(hist);
+    foldLoaded[foldId] = true;
+  }
+}
+
+function renderArcCards(hist) {
+  if (!hist.length) return '<div class="muted">该时间范围内暂无错题记录</div>';
+  return hist.map(function(it) {
+    const tags = (it.knowledge_tags || []).slice(0, 3).map(function(t){
+      return '<span class="tag kb">' + esc(t) + "</span>"; }).join("");
+    // 卡片直接展示完整根因 + 代码片段预览,信息完整无需点开
+    const codePreview = (it.code_snapshot || "").split("\n").slice(0, 6).join("\n");
+    return '<div class="arc-card" onclick="showMistake(' + it.id + ')">' +
+      '<div class="t"><span class="tag type">' + esc(it.error_type) + "</span></div>" +
+      '<div class="cause">' + esc(it.root_cause || "(根因见详情)") + "</div>" +
+      '<div class="code-preview">' + esc(codePreview) + "</div>" +
+      '<div class="tags">' + tags + "</div>" +
+      '<div class="foot"><span>#' + it.id + " · " + esc((it.created_at || "").slice(0, 16)) + "</span>" +
+      "<span>掌握度 " + it.mastery + "</span></div></div>";
+  }).join("");
+}
+
+async function logout() {
+  await fetch("/api/logout", {method: "POST"});
+  location.href = "/login";
+}
+
+async function showMistake(id) {
+  const r = await (await fetch("/api/mistake/" + id)).json();
+  document.getElementById("modalTitle").innerHTML =
+    "错题档案 #" + r.id + ' <span class="tag type">' + esc(r.error_type) + "</span>";
+  let tags = (r.knowledge_tags || []).map(function(t){
+    return '<span class="tag kb">📖 ' + esc(t) + "</span>"; }).join("");
+  document.getElementById("modalBody").innerHTML =
+    '<div class="muted">' + esc(r.created_at) + " | 掌握度 " + r.mastery +
+    " | 已复习 " + r.review_count + " 次 | 下次复习 " + esc((r.next_review_at || "").slice(0, 10)) + "</div>" +
+    '<div style="margin-top:8px;">' + tags + "</div>" +
+    '<div class="detail-label">根因</div><p style="font-size:14px;line-height:1.8;">' + esc(r.root_cause) + "</p>" +
+    '<div class="detail-label">当时的错误代码</div><div class="code-block">' + esc(r.code_snapshot) + "</div>" +
+    '<div class="detail-label">修复后的代码</div><div class="code-block">' + esc(r.fixed_code) + "</div>";
+  document.getElementById("modalMask").classList.add("show");
+}
+
+function closeModal() {
+  document.getElementById("modalMask").classList.remove("show");
+}
+
+async function reviewDone(id, passed) {
+  await fetch("/api/review_done", {method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({id: id, passed: !!passed})});
+  loadArchive();
+}
+</script>
+</body>
+</html>

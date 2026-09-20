@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+data/
+dist/
+cloudflared.exe
+*.log
+reports/eval_*.log
+.vscode/

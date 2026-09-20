@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeTutor · 程序员的 AI 错题搭子</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2d3748; --text:#e6edf3;
+    --muted:#8b949e; --accent:#4f8ef7; --accent2:#7c5cff; --green:#2ea043; --green-bg:#12261e; --red:#f85149; --amber:#d29922; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei","PingFang SC",sans-serif; }
+  .header { padding:16px 32px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(90deg,#0d1117,#131a2a); position:sticky; top:0; z-index:10; }
+  .logo { font-size:22px; font-weight:800; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .logo small { display:block; font-size:12px; color:var(--muted); -webkit-text-fill-color:var(--muted); font-weight:400; }
+  .nav { display:flex; gap:8px; }
+  .nav button { background:none; border:1px solid var(--border); color:var(--muted); padding:8px 18px; border-radius:20px; cursor:pointer; font-size:14px; }
+  .nav button.active { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; border:none; }
+  .container { max-width:1100px; margin:0 auto; padding:24px 32px; }
+  .page { display:none; }
+  .page.active { display:block; }
+  /* 首页 */
+  .hero { text-align:center; padding:50px 20px 40px; }
+  .hero h1 { font-size:44px; font-weight:800; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero .slogan { font-size:18px; color:var(--text); margin:16px 0 6px; }
+  .hero .sub { color:var(--muted); font-size:14px; }
+  .hero .cta { margin-top:28px; }
+  .btn { display:inline-block; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; padding:13px 32px; border-radius:12px; font-size:16px; font-weight:600; text-decoration:none; border:none; cursor:pointer; }
+  .btn.ghost { background:none; border:1px solid var(--border); color:var(--muted); margin-left:12px; }
+  .feat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:36px; }
+  .feat { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:20px; text-align:left; }
+  .feat .ic { font-size:26px; }
+  .feat b { display:block; margin:10px 0 6px; font-size:15px; }
+  .feat p { color:var(--muted); font-size:13px; line-height:1.7; }
+  .tech { margin-top:30px; background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:22px 26px; }
+  .tech h3 { margin-bottom:12px; font-size:16px; }
+  .tech table { width:100%; border-collapse:collapse; font-size:13px; }
+  .tech td { padding:8px 6px; border-bottom:1px solid var(--border); color:var(--muted); }
+  .tech td:first-child { color:var(--accent); font-weight:600; width:180px; }
+  /* 演示/档案共用 */
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:14px; }
+  .card-title { font-size:15px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .user-input { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; }
+  .code-block { background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:14px; font-family:Consolas,monospace; font-size:13px; line-height:1.6; white-space:pre-wrap; color:#a5d6ff; margin-top:10px; }
+  .steps { display:flex; gap:6px; margin:14px 0; flex-wrap:wrap; }
+  .step { flex:1; min-width:120px; text-align:center; padding:10px 4px; border-radius:8px; background:var(--panel); border:1px solid var(--green); font-size:12px; color:var(--green); }
+  .step .t { font-weight:600; font-size:13px; }
+  .step-detail { font-size:11px; color:var(--muted); margin-top:4px; }
+  .tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; background:var(--panel2); border:1px solid var(--border); color:var(--muted); margin:2px 4px 2px 0; }
+  .tag.type { background:rgba(248,81,73,.15); color:var(--red); border-color:var(--red); }
+  .tag.kb { background:rgba(79,142,247,.12); color:var(--accent); border-color:var(--accent); }
+  .explain-item { margin:10px 0; padding-left:12px; border-left:3px solid var(--accent2); line-height:1.8; font-size:14px; }
+  .explain-item b { color:var(--accent2); font-size:13px; }
+  .quiz-item { border:1px solid var(--border); border-radius:10px; padding:14px; margin-top:10px; background:var(--panel2); font-size:14px; }
+  .quiz-q { margin:6px 0; white-space:pre-wrap; }
+  .quiz-answer { margin-top:8px; padding:10px; background:#0a0e14; border-radius:8px; font-size:13px; color:var(--muted); }
+  .quiz-answer summary { color:var(--accent); cursor:pointer; font-size:12px; }
+  .archive-tip { background:linear-gradient(90deg,rgba(79,142,247,.12),rgba(124,92,255,.12)); border:1px solid var(--accent); border-radius:12px; padding:14px 18px; font-size:14px; }
+  .muted { color:var(--muted); font-size:12px; }
+  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+  .stat-box { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
+  .stat-num { font-size:28px; font-weight:700; color:var(--accent); }
+  .stat-label { font-size:12px; color:var(--muted); margin-top:4px; }
+  .weak-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  .weak-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .weak-title { font-size:14px; font-weight:600; }
+  .weak-sub { font-size:11px; color:var(--muted); margin:2px 0 10px; }
+  .wrow { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13px; }
+  .wrow:last-child { border-bottom:none; }
+  .weak-count { background:rgba(79,142,247,.15); color:var(--accent); border-radius:10px; padding:1px 9px; font-size:12px; font-weight:600; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px; }
+  .panel h3 { font-size:15px; margin-bottom:12px; }
+  .row { display:flex; justify-content:space-between; padding:10px 14px; border-bottom:1px solid var(--border); font-size:13px; }
+  .fold-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-bottom:14px; overflow:hidden; }
+  .fold-head { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; }
+  .fold-title { font-size:15px; font-weight:600; }
+  .fold-badge { background:rgba(79,142,247,.15); color:var(--accent); border-radius:12px; padding:2px 12px; font-size:12px; font-weight:600; margin-left:8px; }
+  .fold-body { padding:4px 18px 18px; }
+  .fold-closed-hint { color:var(--muted); font-size:12px; }
+  .arc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .arc-card { background:var(--panel2); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .arc-card .t { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .arc-card .cause { font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:8px; }
+  .arc-card .code-preview { background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:Consolas,monospace; font-size:11px; line-height:1.5; color:#a5d6ff; white-space:pre-wrap; overflow:hidden; max-height:108px; margin-top:6px; }
+  .arc-card .foot { display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--muted); }
+  .arc-card .tags { margin-top:8px; }
+  .arc-card .tags .tag { font-size:11px; padding:2px 8px; }
+  .footer { text-align:center; color:var(--muted); font-size:12px; padding:26px 18px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="logo">CodeTutor<small>程序员的 AI 错题搭子</small></div>
+  <div class="nav">
+    <button class="active" onclick="show('home', this)">产品首页</button>
+    <button onclick="show('demo', this)">在线演示</button>
+    <button onclick="show('archive', this)">我的档案</button>
+  </div>
+</div>
+
+<!-- ============ 首页 ============ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <h1>CodeTutor</h1>
+    <div class="slogan">不止帮你改对,更让你下次不再错</div>
+    <div class="sub">多智能体协作 · 沙箱真实运行验证 · 个人错题档案 · 艾宾浩斯复习闭环</div>
+    <div class="cta">
+      <a class="btn" href="javascript:show('demo', document.querySelectorAll('.nav button')[1])">▶ 查看在线演示</a>
+      <a class="btn ghost" href="https://github.com/daewangpp/my-zhineng" target="_blank">GitHub 源码</a>
+    </div>
+  </div>
+  <div class="container" style="padding-top:0;">
+    <div class="feat-grid">
+      <div class="feat"><div class="ic">🎯</div><b>诊断根因</b><p>粘贴报错代码,多智能体结合 RAG 报错知识库精确定位错误类型、行号与根因。</p></div>
+      <div class="feat"><div class="ic">🔧</div><b>可验证修复</b><p>修复代码必须在隔离沙箱中真实运行通过——凡交付的修复,都经过真实执行验证。</p></div>
+      <div class="feat"><div class="ic">💡</div><b>三段式讲解</b><p>考点定位 / 错因分析 / 原理解读,把错误讲成初学者听得懂的课。</p></div>
+      <div class="feat"><div class="ic">📝</div><b>举一反三</b><p>按需生成巩固/迁移/挑战三道变式练习,从"改对一题"到"掌握一类"。</p></div>
+      <div class="feat"><div class="ic">🗂</div><b>错题档案</b><p>每次 debug 自动归档,三档时间窗薄弱点对比,个人知识画像长期沉淀。</p></div>
+      <div class="feat"><div class="ic">📅</div><b>复习闭环</b><p>按艾宾浩斯遗忘曲线(1/2/4/7/15 天)自动排期复习,对抗遗忘。</p></div>
+    </div>
+    <div class="tech">
+      <h3>⚙️ 技术架构</h3>
+      <table>
+        <tr><td>多智能体编排</td><td>自研轻量流水线:诊断/修复/讲解/出题/档案 5 个 Agent,修复与讲解并行</td></tr>
+        <tr><td>可验证修复</td><td>静态危险扫描 → 隔离执行 → 超时强杀 → 双轨判定(报错消除 + 输出断言比对)</td></tr>
+        <tr><td>RAG 知识库</td><td>自建报错模式库,纯 Python TF-IDF 检索,引用条目全程可溯源</td></tr>
+        <tr><td>长期记忆</td><td>SQLite 错题档案 + 多用户隔离,艾宾浩斯复习调度</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 在线演示 ============ -->
+<div class="page" id="page-demo">
+  <div class="container">
+    <div class="user-input"><b>🧑‍🎓 学生提交:</b>A01 列表索引越界
+      <div class="code-block">scores = [85, 92, 78]
+total = 0
+for i in range(len(scores) + 1):
+    total += scores[i]
+print(total)</div>
+      <div class="muted" style="margin-top:6px;">问题描述:运行报错 IndexError: list index out of range</div>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="t">✔ 诊断 Agent</div><div class="step-detail">IndexError(引用知识库:列表索引越界、差一错误) · 24.7s</div></div>
+      <div class="step"><div class="t">✔ 修复 Agent</div><div class="step-detail">修复方案已生成(尝试 1 次) · 8.7s</div></div>
+      <div class="step"><div class="t">✔ 讲解 Agent</div><div class="step-detail">三段式讲解已生成 · 41.0s</div></div>
+      <div class="step"><div class="t">✔ 档案 Agent</div><div class="step-detail">已归档 #15 · 0.01s</div></div>
+      <div class="step"><div class="t">✔ 出题 Agent(按需)</div><div class="step-detail">3 道变式练习 · 14.3s</div></div>
+    </div>
+    <div class="card"><div class="card-title">🎯 诊断报告 <span class="tag type">IndexError</span> <span class="tag">第 4 行</span></div>
+      <p style="font-size:14px;line-height:1.8;">列表长度为 3,有效索引是 0-2。range(len(scores)+1) 产生 0-3,当 i=3 时访问 scores[3] 超出范围。</p>
+      <div style="margin-top:8px;"><span class="tag kb">📖 列表索引越界</span><span class="tag kb">📖 差一错误</span></div>
+      <div class="muted" style="margin-top:8px;">RAG 引用知识库:KB001 列表索引越界、KB012 差一错误(off-by-one)</div></div>
+    <div class="card"><div class="card-title">🔧 修复方案</div>
+      <div class="muted">将 range(len(scores) + 1) 改为 range(len(scores)),避免索引越界</div>
+      <div class="code-block">scores = [85, 92, 78]
+total = 0
+for i in range(len(scores)):
+    total += scores[i]
+print(total)</div>
+      <div class="muted" style="margin-top:6px;">运行结果:</div><div class="code-block">255</div></div>
+    <div class="card"><div class="card-title">💡 三段式讲解</div>
+      <div class="explain-item"><b>考点定位</b><br>列表索引越界与循环边界控制。Python 列表索引从 0 开始,长度为 n 的列表有效索引范围是 0 到 n-1。</div>
+      <div class="explain-item"><b>错因分析</b><br>初学者常混淆"元素个数"与"最大索引",误以为 range 需要覆盖到长度本身,导致多生成一个无效索引。</div>
+      <div class="explain-item"><b>原理解读</b><br>range(n) 生成 0 到 n-1。去掉 +1 后,循环恰好遍历所有合法索引,避免访问不存在的第 4 个位置。</div></div>
+    <div class="card"><div class="card-title">📝 变式练习(举一反三 · 按需生成)</div>
+      <div class="quiz-item"><b>[改错] 巩固题</b><div class="quiz-q">以下代码会抛出 IndexError,请修正:
+scores = [85, 90, 78]
+total = 0
+for i in range(len(scores)+1):
+    total += scores[i]
+print(total)</div><details class="quiz-answer"><summary>查看答案</summary>将 range(len(scores)+1) 改为 range(len(scores))。原代码当 i=3 时 scores[3] 越界。</details></div>
+      <div class="quiz-item"><b>[填空] 迁移题</b><div class="quiz-q">补全代码正确计算平方和:
+numbers = [1, 2, 3, 4]
+sum_sq = 0
+for i in range(__):
+    sum_sq += numbers[i]**2</div><details class="quiz-answer"><summary>查看答案</summary>len(numbers)。不能用 len(numbers)+1,否则 i=4 时触发 IndexError。</details></div>
+      <div class="quiz-item"><b>[实践] 挑战题</b><div class="quiz-q">统计列表中大于平均值的元素个数(需正确处理边界)</div><details class="quiz-answer"><summary>查看答案</summary>data = [10, 25, 30, 15, 40]; avg = sum(data)/len(data); count = sum(1 for x in data if x > avg) # 输出 2</details></div></div>
+    <div class="archive-tip">🗂 本次 debug 已归档为 <b>#15</b>,系统已按艾宾浩斯遗忘曲线安排复习(1/2/4/7/15 天)。</div>
+  </div>
+</div>
+
+<!-- ============ 我的档案 ============ -->
+<div class="page" id="page-archive">
+  <div class="container">
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num">28</div><div class="stat-label">错题总数</div></div>
+      <div class="stat-box"><div class="stat-num">23</div><div class="stat-label">今日新增</div></div>
+      <div class="stat-box"><div class="stat-num">5</div><div class="stat-label">今日待复习</div></div>
+      <div class="stat-box"><div class="stat-num">8</div><div class="stat-label">覆盖错误类型</div></div>
+    </div>
+    <div class="weak-grid">
+      <div class="weak-card"><div class="weak-title">⚡ 近 24 小时薄弱点</div><div class="weak-sub">最新的问题</div><div class="wrow"><span>可变默认参数陷阱</span><span class="weak-count">× 6</span></div><div class="wrow"><span>列表索引越界</span><span class="weak-count">× 6</span></div><div class="wrow"><span>差一错误</span><span class="weak-count">× 5</span></div><div class="wrow"><span>除零错误</span><span class="weak-count">× 4</span></div></div>
+      <div class="weak-card"><div class="weak-title">📈 近 7 天薄弱点</div><div class="weak-sub">近期趋势</div><div class="wrow"><span>可变默认参数陷阱</span><span class="weak-count">× 9</span></div><div class="wrow"><span>列表索引越界</span><span class="weak-count">× 7</span></div><div class="wrow"><span>差一错误</span><span class="weak-count">× 6</span></div><div class="wrow"><span>除零错误</span><span class="weak-count">× 4</span></div></div>
+      <div class="weak-card"><div class="weak-title">🧱 历史累计薄弱点</div><div class="weak-sub">长期顽疾</div><div class="wrow"><span>可变默认参数陷阱</span><span class="weak-count">× 9</span></div><div class="wrow"><span>列表索引越界</span><span class="weak-count">× 7</span></div><div class="wrow"><span>差一错误</span><span class="weak-count">× 6</span></div><div class="wrow"><span>空列表处理</span><span class="weak-count">× 4</span></div></div>
+    </div>
+    <div class="panel"><h3>📅 今日到期复习(艾宾浩斯调度)</h3>
+      <div class="row"><span>#1 [LogicError] 可变默认参数共享导致数据累积</span><span class="muted">待复习</span></div>
+      <div class="row"><span>#2 [IndexError] range(len+1) 导致循环多执行一次</span><span class="muted">待复习</span></div>
+      <div class="row"><span>#3 [RecursionError] 递归缺少终止条件(基例)</span><span class="muted">待复习</span></div>
+    </div>
+    <h3 style="margin:6px 0 12px;">📚 错题档案(点击查看)</h3>
+    <div class="fold-card">
+      <div class="fold-head"><span class="fold-title">⚡ 近 24 小时错题<span class="fold-badge">23 条</span></span><span class="muted">▼ 已展开</span></div>
+      <div class="fold-body"><div class="arc-grid">
+        <div class="arc-card"><div class="t"><span class="tag type">RecursionError</span></div><div class="cause">递归函数缺少终止条件(基例),参数 n 不断减小但永远不会触发停止逻辑,导致无限递归。</div><div class="code-preview">def factorial(n):
+    return n * factorial(n - 1)</div><div class="tags"><span class="tag kb">递归</span><span class="tag kb">基例缺失</span></div><div class="foot"><span>#28</span><span>掌握度 0</span></div></div>
+        <div class="arc-card"><div class="t"><span class="tag type">IndexError</span></div><div class="cause">range(len(scores) + 1) 生成了 0 到 3 的索引,但列表长度仅为 3,属于典型的边界多 1 错误。</div><div class="code-preview">for i in range(len(scores) + 1):
+    total += scores[i]</div><div class="tags"><span class="tag kb">列表索引越界</span></div><div class="foot"><span>#27</span><span>掌握度 0</span></div></div>
+        <div class="arc-card"><div class="t"><span class="tag type">LogicError</span></div><div class="cause">函数默认参数在定义时只创建一次,多次调用共享同一对象,导致数据被累积。</div><div class="code-preview">def add_item(item, box=[]):
+    box.append(item)</div><div class="tags"><span class="tag kb">可变默认参数</span></div><div class="foot"><span>#25</span><span>掌握度 0</span></div></div>
+      </div></div>
+    </div>
+    <div class="fold-card">
+      <div class="fold-head"><span class="fold-title">🧱 历史累计错题<span class="fold-badge">28 条</span></span><span class="fold-closed-hint">▶ 点击展开</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">CodeTutor · 程序员的 AI 错题搭子 · 由 5 个专业智能体协作驱动</div>
+
+<script>
+function show(page, btn) {
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav button').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

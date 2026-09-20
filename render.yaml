@@ -1,0 +1,19 @@
+# Render 部署配置(Blueprint)
+# 文档: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: codetutor
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    # timeout 120:LLM 调用较慢,避免 gunicorn 默认 30s 超时断连
+    startCommand: gunicorn web_app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.11
+      - key: CODETUTOR_BASE_URL
+        value: https://vmrouter.vip/v1
+      - key: CODETUTOR_MODEL
+        value: qwen3.5-flash
+      - key: CODETUTOR_API_KEY
+        sync: false   # 在 Render 控制台手动填写,不写进代码仓库(安全)

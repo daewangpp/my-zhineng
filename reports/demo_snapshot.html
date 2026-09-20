@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><title>CodeTutor 演示快照 · A01 列表索引越界</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2d3748; --text:#e6edf3;
+    --muted:#8b949e; --accent:#4f8ef7; --accent2:#7c5cff; --green:#2ea043; --green-bg:#12261e; --red:#f85149; --amber:#d29922; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei","PingFang SC",sans-serif; }
+  .header { padding:18px 32px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; background:linear-gradient(90deg,#0d1117,#131a2a); }
+  .logo { font-size:22px; font-weight:700; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .logo small { display:block; font-size:12px; color:var(--muted); -webkit-text-fill-color:var(--muted); font-weight:400; }
+  .badge-mock { background:var(--amber); color:#1a1a1a; font-size:12px; padding:3px 10px; border-radius:10px; font-weight:600; }
+  .container { max-width:1100px; margin:0 auto; padding:22px 32px; }
+  .user-input { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:14px; }
+  .code-block { background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:14px; font-family:Consolas,monospace; font-size:13px; line-height:1.6; white-space:pre-wrap; color:#a5d6ff; margin-top:10px; }
+  .steps { display:flex; gap:6px; margin:14px 0; }
+  .step { flex:1; text-align:center; padding:10px 4px; border-radius:8px; background:var(--panel); border:1px solid var(--green); font-size:12px; color:var(--green); }
+  .step.error { border-color:var(--red); color:var(--red); }
+  .step .t { font-weight:600; font-size:13px; }
+  .step-detail { font-size:11px; color:var(--muted); margin-top:4px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:14px; }
+  .card-title { font-size:15px; font-weight:600; margin-bottom:10px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; background:var(--panel2); border:1px solid var(--border); color:var(--muted); margin:2px 4px 2px 0; }
+  .tag.type { background:rgba(248,81,73,.15); color:var(--red); border-color:var(--red); }
+  .tag.kb { background:rgba(79,142,247,.12); color:var(--accent); border-color:var(--accent); }
+  .verify-badge { padding:5px 14px; border-radius:14px; font-size:13px; font-weight:600; background:var(--green-bg); color:var(--green); border:1px solid var(--green); }
+  .verify-badge.fail { background:rgba(248,81,73,.12); color:var(--red); border-color:var(--red); }
+  .explain-item { margin:10px 0; padding-left:12px; border-left:3px solid var(--accent2); line-height:1.8; font-size:14px; }
+  .explain-item b { color:var(--accent2); font-size:13px; }
+  .quiz-item { border:1px solid var(--border); border-radius:10px; padding:14px; margin-top:10px; background:var(--panel2); font-size:14px; }
+  .quiz-q { margin:6px 0; white-space:pre-wrap; }
+  .quiz-answer { margin-top:8px; padding:10px; background:#0a0e14; border-radius:8px; font-size:13px; color:var(--muted); }
+  .quiz-answer summary { color:var(--accent); cursor:pointer; font-size:12px; }
+  .archive-tip { background:linear-gradient(90deg,rgba(79,142,247,.12),rgba(124,92,255,.12)); border:1px solid var(--accent); border-radius:12px; padding:14px 18px; font-size:14px; }
+  .muted { color:var(--muted); font-size:12px; }
+  .footer { text-align:center; color:var(--muted); font-size:12px; padding:18px; }
+</style></head><body>
+<div class="header"><div class="logo">CodeTutor<small>程序员的 AI 错题搭子 · 多智能体 · 沙箱验证 · 错题闭环</small></div></div>
+<div class="container">
+  <div class="user-input"><b>🧑‍🎓 学生提交:</b>A01 列表索引越界
+    <div class="code-block">scores = [85, 92, 78]
+total = 0
+for i in range(len(scores) + 1):
+    total += scores[i]
+print(total)
+</div>
+    <div class="muted" style="margin-top:6px;">问题描述:运行报错:IndexError: list index out of range</div>
+  </div>
+  <div class="steps"><div class="step done"><div class="t">✔ 诊断 Agent</div><div class="step-detail">IndexError(引用知识库:列表索引越界、差一错误(off-by-one))| 循环边界多写了 1，导致最后一次循环访问了不存在的索引。 · 24.68s</div></div><div class="step done"><div class="t">✔ 修复 Agent(沙箱验证)</div><div class="step-detail">修复方案已生成(尝试 1 次)| 运行输出: 255 · 8.66s</div></div><div class="step done"><div class="t">✔ 讲解 Agent</div><div class="step-detail">三段式讲解已生成(考点/错因/原理) · 41.01s</div></div><div class="step done"><div class="t">✔ 档案 Agent</div><div class="step-detail">已归档(档案编号 #15),已按艾宾浩斯曲线排入复习计划 · 0.01s</div></div><div class="step done"><div class="t">✔ 出题 Agent(按需)</div><div class="step-detail">生成 3 道变式练习(巩固/迁移/挑战) · 14.31s</div></div></div>
+  <div class="card"><div class="card-title">🎯 诊断报告 <span class="tag type">IndexError</span> <span class="tag">第 4 行</span></div>
+    <p style="font-size:14px;line-height:1.8;">列表长度为 3，有效索引是 0-2。range(len(scores)+1) 产生 0-3，当 i=3 时访问 scores[3] 超出范围。</p>
+    <div style="margin-top:8px;"><span class="tag kb">📖 列表索引越界</span><span class="tag kb">📖 差一错误</span></div>
+    <div class="muted" style="margin-top:8px;">RAG 引用知识库:KB001 列表索引越界、KB012 差一错误(off-by-one)</div></div>
+  <div class="card"><div class="card-title">🔧 修复方案</div>
+    <div class="muted">将 range(len(scores) + 1) 改为 range(len(scores))，避免索引越界</div>
+    <div class="code-block">scores = [85, 92, 78]
+total = 0
+for i in range(len(scores)):
+    total += scores[i]
+print(total)</div><div class="muted" style="margin-top:6px;">运行结果:</div><div class="code-block">255
+</div></div>
+  <div class="card"><div class="card-title">💡 三段式讲解</div>
+    <div class="explain-item"><b>考点定位</b><br>列表索引越界与循环边界控制。Python 列表索引从 0 开始，长度为 n 的列表有效索引范围是 0 到 n-1，循环次数需严格匹配。</div>
+    <div class="explain-item"><b>错因分析</b><br>初学者常混淆“元素个数”与“最大索引”。误以为 range 需要覆盖到长度本身，或受数学计数习惯影响（1 到 n），导致多生成一个无效索引，触发越界。</div>
+    <div class="explain-item"><b>原理解读</b><br>`range(n)` 生成 0 到 n-1 的整数。列表长度为 3 时，有效索引为 0、1、2。去掉 +1 后，循环恰好遍历所有合法索引，避免访问不存在的第 4 个位置。</div></div>
+  <div class="card"><div class="card-title">📝 变式练习(举一反三 · 按需生成)</div>
+    <div class="muted" style="margin-bottom:8px;">主流程仅做诊断/修复/讲解,练习由用户点击后触发出题 Agent 生成,缩短响应时间。以下为点击后生成结果:</div><div class="quiz-item"><b>[改错] 巩固题(改错)</b><div class="quiz-q">以下代码会抛出IndexError，请修正：
+
+scores = [85, 90, 78]
+total = 0
+for i in range(len(scores)+1):
+    total += scores[i]
+print(total)</div><details class="quiz-answer"><summary>查看答案</summary>正确答案：将range(len(scores)+1)改为range(len(scores))
+解析：原代码中len(scores)=3，range(4)会产生0-3的索引，当i=3时scores[3]越界。应使用range(len(scores))确保索引在0-2范围内。</details></div><div class="quiz-item"><b>[填空] 迁移题(填空)</b><div class="quiz-q">补全代码使能正确计算列表元素平方和：
+
+numbers = [1, 2, 3, 4]
+sum_sq = 0
+for i in range(__):
+    sum_sq += numbers[i]**2
+print(sum_sq)</div><details class="quiz-answer"><summary>查看答案</summary>正确答案：len(numbers)
+解析：必须使用len(numbers)而非len(numbers)+1，否则当i=4时会触发IndexError。注意列表索引从0开始，最大索引为长度减1。</details></div><div class="quiz-item"><b>[实践] 挑战题(小实践)</b><div class="quiz-q">编写程序统计列表中大于平均值的元素个数（需正确处理边界）：
+
+data = [10, 25, 30, 15, 40]
+avg = sum(data)/len(data)
+count = 0
+for i in __:
+    if data[i] &gt; avg:
+        count += 1
+print(count)</div><details class="quiz-answer"><summary>查看答案</summary>参考答案：range(len(data))
+完整代码：
+data = [10, 25, 30, 15, 40]
+avg = sum(data)/len(data)
+count = 0
+for i in range(len(data)):
+    if data[i] &gt; avg:
+        count += 1
+print(count) # 输出2
+解析：必须确保循环索引不超出列表范围，同时正确计算平均值后比较。</details></div></div>
+  <div class="archive-tip">🗂 本次 debug 已归档为 <b>#15</b>,系统已按艾宾浩斯遗忘曲线安排复习(1/2/4/7/15 天),可在「我的档案」查看学情与今日复习。</div>
+  <div class="footer">CodeTutor 演示快照 · 生成于 2026-09-19 21:15:54</div>
+</div></body></html>

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8"><title>CodeTutor 我的档案</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#2d3748; --text:#e6edf3;
+    --muted:#8b949e; --accent:#4f8ef7; --accent2:#7c5cff; --green:#2ea043; --red:#f85149; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei","PingFang SC",sans-serif; }
+  .header { padding:18px 32px; border-bottom:1px solid var(--border); background:linear-gradient(90deg,#0d1117,#131a2a); display:flex; justify-content:space-between; }
+  .logo { font-size:22px; font-weight:700; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .logo small { display:block; font-size:12px; color:var(--muted); -webkit-text-fill-color:var(--muted); font-weight:400; }
+  .user { color:var(--muted); font-size:13px; align-self:center; }
+  .container { max-width:1100px; margin:0 auto; padding:22px 32px; }
+  .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+  .stat-box { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
+  .stat-num { font-size:28px; font-weight:700; color:var(--accent); }
+  .stat-label { font-size:12px; color:var(--muted); margin-top:4px; }
+  .weak-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:16px; }
+  .weak-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; min-height:130px; }
+  .weak-title { font-size:14px; font-weight:600; }
+  .weak-sub { font-size:11px; color:var(--muted); margin:2px 0 10px; }
+  .wrow { display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed var(--border); font-size:13px; }
+  .wrow:last-child { border-bottom:none; }
+  .weak-count { background:rgba(79,142,247,.15); color:var(--accent); border-radius:10px; padding:1px 9px; font-size:12px; font-weight:600; }
+  .weak-empty { color:var(--muted); font-size:12px; padding:12px 0; text-align:center; }
+  .panel { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:18px; margin-bottom:16px; }
+  .panel h3 { font-size:15px; margin-bottom:12px; }
+  .tag { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; background:rgba(79,142,247,.12); color:var(--accent); border:1px solid var(--accent); margin:2px 4px 2px 0; }
+  .tag.type { background:rgba(248,81,73,.15); color:var(--red); border-color:var(--red); }
+  .row { display:flex; justify-content:space-between; padding:10px 14px; border-bottom:1px solid var(--border); font-size:13px; }
+  .muted { color:var(--muted); font-size:12px; }
+  .fold-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; margin-bottom:14px; overflow:hidden; }
+  .fold-head { display:flex; justify-content:space-between; align-items:center; padding:14px 18px; }
+  .fold-title { font-size:15px; font-weight:600; }
+  .fold-badge { background:rgba(79,142,247,.15); color:var(--accent); border-radius:12px; padding:2px 12px; font-size:12px; font-weight:600; margin-left:8px; }
+  .fold-body { padding:4px 18px 18px; }
+  .fold-closed-hint { color:var(--muted); font-size:12px; }
+  .arc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .arc-card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .arc-card .t { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .arc-card .cause { font-size:12px; color:var(--muted); line-height:1.6; margin-bottom:8px; }
+  .arc-card .code-preview { background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:8px 10px; font-family:Consolas,monospace; font-size:11px; line-height:1.5; color:#a5d6ff; white-space:pre-wrap; overflow:hidden; max-height:108px; margin-top:6px; }
+  .arc-card .foot { display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--muted); }
+  .arc-card .tags { margin-top:8px; }
+  .arc-card .tags .tag { font-size:11px; padding:2px 8px; }
+  .arc-card .code-block { background:#0a0e14; border:1px solid var(--border); border-radius:8px; padding:10px; font-family:Consolas,monospace; font-size:11.5px; line-height:1.5; white-space:pre-wrap; color:#a5d6ff; margin-top:8px; }
+</style></head><body>
+<div class="header"><div class="logo">CodeTutor<small>我的档案 · 个人错题数据资产</small></div><div class="user">👤 demo</div></div>
+<div class="container">
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-num">28</div><div class="stat-label">错题总数</div></div>
+    <div class="stat-box"><div class="stat-num">23</div><div class="stat-label">今日新增</div></div>
+    <div class="stat-box"><div class="stat-num">5</div><div class="stat-label">今日待复习</div></div>
+    <div class="stat-box"><div class="stat-num">8</div><div class="stat-label">覆盖错误类型</div></div>
+  </div>
+  <div class="weak-grid">
+    <div class="weak-card"><div class="weak-title">⚡ 近 24 小时薄弱点</div><div class="weak-sub">最新的问题</div><div class="wrow"><span>可变默认参数陷阱</span><span class="weak-count">× 6</span></div><div class="wrow"><span>列表索引越界</span><span class="weak-count">× 6</span></div><div class="wrow"><span>差一错误</span><span class="weak-count">× 5</span></div><div class="wrow"><span>除零错误</span><span class="weak-count">× 4</span></div><div class="wrow"><span>空列表处理</span><span class="weak-count">× 4</span></div></div>
+    <div class="weak-card"><div class="weak-title">📈 近 7 天薄弱点</div><div class="weak-sub">近期趋势</div><div class="wrow"><span>可变默认参数陷阱</span><span class="weak-count">× 9</span></div><div class="wrow"><span>列表索引越界</span><span class="weak-count">× 7</span></div><div class="wrow"><span>差一错误</span><span class="weak-count">× 6</span></div><div class="wrow"><span>除零错误</span><span class="weak-count">× 4</span></div><div class="wrow"><span>空列表处理</span><span class="weak-count">× 4</span></div></div>
+    <div class="weak-card"><div class="weak-title">🧱 历史累计薄弱点</div><div class="weak-sub">长期顽疾</div><div class="wrow"><span>可变默认参数陷阱</span><span class="weak-count">× 9</span></div><div class="wrow"><span>列表索引越界</span><span class="weak-count">× 7</span></div><div class="wrow"><span>差一错误</span><span class="weak-count">× 6</span></div><div class="wrow"><span>除零错误</span><span class="weak-count">× 4</span></div><div class="wrow"><span>空列表处理</span><span class="weak-count">× 4</span></div></div>
+  </div>
+  <div class="panel"><h3>📅 今日到期复习(艾宾浩斯调度)</h3><div class="row"><span>#1 [LogicError] 函数默认参数在定义时仅创建一次，后续每次调用都复用同一个列表对象，导致数据累积而</span><span class="muted">待复习</span></div><div class="row"><span>#2 [IndexError] range(len(scores) + 1) 导致循环多执行一次，产生索引 3。</span><span class="muted">待复习</span></div><div class="row"><span>#3 [RecursionError] 函数缺少终止条件（基例），参数 n 递减后未判断是否到达边界，导致无限递归调用自</span><span class="muted">待复习</span></div><div class="row"><span>#4 [LogicError] 根据 KB004，函数默认参数仅在定义时创建一次。使用可变列表做默认值会导致多次</span><span class="muted">待复习</span></div><div class="row"><span>#5 [LogicError] 函数默认参数 box=[] 在定义时只初始化一次，后续调用共享同一列表对象，导致</span><span class="muted">待复习</span></div></div>
+  <h3 style="margin:6px 0 12px;">📚 错题档案(点击查看)</h3>
+  <div class="fold-card">
+    <div class="fold-head"><span class="fold-title">⚡ 近 24 小时错题<span class="fold-badge">23 条</span></span><span class="muted">▼ 已展开</span></div>
+    <div class="fold-body"><div class="arc-grid"><div class="arc-card"><div class="t"><span class="tag type">RecursionError</span></div><div class="cause">递归函数缺少终止条件（基例），参数 n 不断减小但永远不会触发停止逻辑，导致无限递归直至超出最大深度。</div><div class="code-preview">def factorial(n):
+    return n * factorial(n - 1)
+
+print(factorial(5))</div><div class="tags"><span class="tag">递归</span><span class="tag">基例缺失</span></div><div class="foot"><span>#28 · 2026-09-19T22:31</span><span>掌握度 0</span></div></div><div class="arc-card"><div class="t"><span class="tag type">IndexError</span></div><div class="cause">range(len(scores) + 1) 生成了 0 到 3 的索引，但列表长度仅为 3（最大索引为 2）。当 i=3 时访问 scores[3] 超出范围，属于典型的边界多 1 错误。</div><div class="code-preview">scores = [85, 92, 78]
+total = 0
+for i in range(len(scores) + 1):
+    total += scores[i]
+print(total)</div><div class="tags"><span class="tag">列表索引越界</span><span class="tag">差一错误</span></div><div class="foot"><span>#27 · 2026-09-19T22:29</span><span>掌握度 0</span></div></div><div class="arc-card"><div class="t"><span class="tag type">IndexError</span></div><div class="cause">range(len(scores) + 1) 会生成 0 到 3 的索引，但列表只有 0 到 2。当循环执行到 i=3 时，访问 scores[3] 导致索引越界。</div><div class="code-preview">scores = [85, 92, 78]
+total = 0
+for i in range(len(scores) + 1):
+    total += scores[i]
+print(total)
+</div><div class="tags"><span class="tag">列表索引越界</span><span class="tag">差一错误</span></div><div class="foot"><span>#26 · 2026-09-19T22:15</span><span>掌握度 0</span></div></div><div class="arc-card"><div class="t"><span class="tag type">LogicError</span></div><div class="cause">函数默认参数在定义时只创建一次，列表是可变对象，多次调用共享同一对象，导致数据被累积。</div><div class="code-preview">def add_item(item, box=[]):
+    box.append(item)
+    return box
+
+print(add_item(1))
+print(add_item(2))</div><div class="tags"><span class="tag">KB004</span><span class="tag">可变默认参数陷阱</span></div><div class="foot"><span>#25 · 2026-09-19T22:13</span><span>掌握度 0</span></div></div><div class="arc-card"><div class="t"><span class="tag type">RuntimeError</span></div><div class="cause">数组长度为3，有效索引为0-2，访问arr[3]超出边界，触发未定义行为。</div><div class="code-preview">#include &lt;stdio.h&gt;
+int main()
+{
+    int arr[3] = {1,2,3};
+    // 数组下标0,1,2，arr[3]越界，未定义行为
+    printf(&quot;%d&quot;, arr[3]);</div><div class="tags"><span class="tag">C语言</span><span class="tag">数组越界</span><span class="tag">内存安全</span></div><div class="foot"><span>#24 · 2026-09-19T22:09</span><span>掌握度 0</span></div></div><div class="arc-card"><div class="t"><span class="tag type">RuntimeError</span></div><div class="cause">C 语言数组下标从 0 开始，大小为 3 的数组最大有效下标为 2，访问 arr[3] 属于越界操作，引发未定义行为（可能崩溃或输出垃圾值）。</div><div class="code-preview">#include &lt;stdio.h&gt;
+int main()
+{
+    int arr[3] = {1,2,3};
+    // 数组下标0,1,2，arr[3]越界，未定义行为
+    printf(&quot;%d&quot;, arr[3]);</div><div class="tags"><span class="tag">数组越界</span><span class="tag">内存安全</span></div><div class="foot"><span>#23 · 2026-09-19T21:58</span><span>掌握度 0</span></div></div></div></div>
+  </div>
+  <div class="fold-card">
+    <div class="fold-head"><span class="fold-title">🧱 历史累计错题<span class="fold-badge">28 条</span></span><span class="fold-closed-hint">▶ 点击展开</span></div>
+  </div>
+</div></body></html>

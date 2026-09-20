@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>登录 · CodeTutor</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --border:#2d3748; --text:#e6edf3; --muted:#8b949e; --accent:#4f8ef7; --accent2:#7c5cff; --red:#f85149; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:"Microsoft YaHei","PingFang SC",sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .box { width:400px; max-width:92vw; }
+  .logo { text-align:center; font-size:34px; font-weight:800; background:linear-gradient(90deg,var(--accent),var(--accent2)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .slogan { text-align:center; color:var(--muted); font-size:13px; margin:8px 0 28px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:16px; padding:30px 32px; }
+  .tabs { display:flex; gap:8px; margin-bottom:22px; }
+  .tab { flex:1; text-align:center; padding:10px; border-radius:10px; border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:14px; }
+  .tab.active { background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; border:none; font-weight:600; }
+  label { display:block; font-size:13px; color:var(--muted); margin:14px 0 6px; }
+  input { width:100%; background:#0a0e14; border:1px solid var(--border); border-radius:10px; padding:12px 14px; color:var(--text); font-size:14px; }
+  input:focus { outline:none; border-color:var(--accent); }
+  .btn { width:100%; margin-top:22px; padding:13px; border:none; border-radius:10px; background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  .btn:hover { opacity:.9; }
+  .btn:disabled { opacity:.5; cursor:wait; }
+  .msg { min-height:20px; font-size:13px; margin-top:12px; text-align:center; color:var(--red); }
+  .tip { text-align:center; color:var(--muted); font-size:12px; margin-top:18px; }
+  .feat { display:flex; justify-content:space-around; margin-top:26px; }
+  .feat div { text-align:center; font-size:12px; color:var(--muted); }
+  .feat b { display:block; font-size:16px; color:var(--text); margin-bottom:4px; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="logo">CodeTutor</div>
+  <div class="slogan">程序员的 AI 错题搭子 · 你的每道错题都值得被记住</div>
+  <div class="card">
+    <div class="tabs">
+      <div class="tab active" id="tabLogin" onclick="switchTab('login')">登 录</div>
+      <div class="tab" id="tabReg" onclick="switchTab('register')">注 册</div>
+    </div>
+    <label>用户名</label>
+    <input id="username" placeholder="3-20 个字符" autocomplete="username">
+    <label>密码</label>
+    <input id="password" type="password" placeholder="6-64 个字符" autocomplete="current-password" onkeydown="if(event.key==='Enter')submit()">
+    <button class="btn" id="submitBtn" onclick="submit()">进入我的错题本</button>
+    <div class="msg" id="msg"></div>
+    <div class="tip">演示账号:demo / demo123</div>
+  </div>
+  <div class="feat">
+    <div><b>沙箱验证</b>修复真实可跑</div>
+    <div><b>错题档案</b>个人专属</div>
+    <div><b>复习推送</b>艾宾浩斯曲线</div>
+  </div>
+</div>
+<script>
+let mode = "login";
+function switchTab(m) {
+  mode = m;
+  document.getElementById("tabLogin").className = "tab" + (m === "login" ? " active" : "");
+  document.getElementById("tabReg").className = "tab" + (m === "register" ? " active" : "");
+  document.getElementById("submitBtn").textContent = m === "login" ? "进入我的错题本" : "注册并开始使用";
+  document.getElementById("msg").textContent = "";
+}
+async function submit() {
+  const u = document.getElementById("username").value.trim();
+  const p = document.getElementById("password").value;
+  const btn = document.getElementById("submitBtn");
+  const msg = document.getElementById("msg");
+  if (!u || !p) { msg.textContent = "请输入用户名和密码"; return; }
+  btn.disabled = true;
+  try {
+    const resp = await fetch("/api/" + mode, {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({username: u, password: p})
+    });
+    const r = await resp.json();
+    if (resp.ok && r.ok) {
+      msg.style.color = "#2ea043";
+      msg.textContent = (mode === "login" ? "登录成功" : "注册成功") + ",正在进入...";
+      location.href = "/";
+    } else {
+      msg.textContent = r.error || "操作失败";
+    }
+  } catch (e) {
+    msg.textContent = "网络错误: " + e.message;
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
